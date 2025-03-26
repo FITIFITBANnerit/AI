@@ -10,17 +10,17 @@ class OCRModel:
         self.ocr_result = {}
 
     def run_ocr(self, images):
-        ocr_text = []
         ocr_dic = {}
         for i, image in enumerate(images):
+            ocr_text = []
             result = self._ocr.ocr(image, cls=False)
             self.ocr_result = result[0]
 
             if self.ocr_result:
                 for r in result[0]:
-                    ocr_text.append((r[0], r[1]))
-                ocr_dic[i + 1] = ocr_text
-                
+                    ocr_text.append((r[1][0]))
+                    
+            ocr_dic[i] = ocr_text
 
         return ocr_dic
         

@@ -27,7 +27,8 @@ def main():
     
         if results:
             for result in results.items():
-                print(result, "\n")
+                combined_text = " ".join(r for r in result[1])
+                print(combined_text, "\n")
             
         else:
             print("No text detected")
