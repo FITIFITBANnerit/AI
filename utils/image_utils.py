@@ -20,16 +20,15 @@ def crop_image(image, x, y, w, h):
 
 def cropped_banner(original_image, banners, holders, output_dir):
     cropped_banners = []
-    height, width, _ = original_image.shape
         
     for banner in banners:
         for holder in holders:
             if is_inside(banner, holder):
-                banner['legal'] = True
+                banner['lebal'] = True
                 break
                     
         else:
-            cropped = crop_image(original_image, banner['x'], banner['y'], banner['width'], banner['height'])
-            cropped_banners.append(cropped)
+            banner['legal'] = None
+            cropped_banners.append([banner['x'], banner['y'], banner['width'], banner['height']])
     
     return cropped_banners
