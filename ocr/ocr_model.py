@@ -19,8 +19,12 @@ class OCRModel:
             ocr_preprocessing = OCRPreprocessing(image)
             preprocessing_image = ocr_preprocessing.image_preprocessing()
             result = self._ocr.ocr(preprocessing_image, cls=False)
-            ocr_results[i] = result[0]
-            ocr_results[i].append((cord[2], cord[3]))
+            
+            if result[0] != None:
+                ocr_results[i] = result[0]
+                ocr_results[i].append((cord[2], cord[3])) # 배너 너비, 높이 추가
+            else:
+                ocr_results[i] = ["Can't detection text!!"]
         return ocr_results
         
         
