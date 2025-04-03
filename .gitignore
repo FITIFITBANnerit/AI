@@ -1,5 +1,7 @@
 .DS_Store
 __pycache__
 data/
-cropped_images/
 config.py
+dummy/
+model_train/
+preprocessing_image/
