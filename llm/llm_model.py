@@ -26,6 +26,7 @@ class BannerTextClassifier:
                                 {
                                     "type": "text",
                                     "text": f"""
+                                        
                                                 Analyze the meaning of the following banner text and classify it into the most relevant category from the list below.
 
                                                 **Banner Text:** {selected_text}
@@ -96,6 +97,12 @@ class BannerTextClassifier:
                                                 Extract phone numbers and a company name or store name from {full_text}. If there are none, answer {no_info}.
                                                 The output is printed as an example.
                                                 
+                                                ### Output Format (Strictly Follow This):
+
+                                                ```
+                                                Company: "Company Name"
+                                                Phone Number: "Phone Number"
+                                                ```
                                             """
                                 }
                             ]
@@ -118,6 +125,7 @@ class BannerTextClassifier:
     def process_banner_text(self, selected_text, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
         classification_result = self.classify_banner_text(selected_text)
+        info = None
         
         # 정규식으로 카테고리 추출
         match = re.search(r'Category:\s*"([^"]+)"', classification_result)
@@ -126,15 +134,11 @@ class BannerTextClassifier:
         category = match.group(1) if match else "Unknown"
         
         if category == "Commercial purposes":
-            print(classification_result)
             result = "illegal"
-            company_info = self.extract_info(full_text)
-            print("\nExtracted Company Info:\n", company_info)
+            info = self.extract_info(full_text)
         else:
-            print(classification_result)
             result = "legal"
-            company_info = None
         
-        return result, company_info, category
+        return result, category, info
                 
                 
