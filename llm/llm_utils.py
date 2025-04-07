@@ -31,7 +31,7 @@ def extract_company_info(info):
     if info:
         # 정규식 패턴
         company_pattern = r'Company:\s*(.+)'
-        phone_pattern = r'Phone Number:\s*"([\d\s-]+)"' 
+        phone_pattern = r'Phone Number:\s*"?([\d\s-]+)"?'
 
         # 정규식 매칭
         company_match = re.search(company_pattern, info)
@@ -45,4 +45,35 @@ def extract_company_info(info):
             phone_number = re.sub(r'\D', '', phone_match.group(1))  # 숫자만 추출
 
     return company_name, phone_number
+
+def analyze_banner_text(ocr_texts, llm, cropped):
+    """LLM을 이용하여 현수막의 불법 여부, 카테고리, 전화번호 및 회사명을 추출"""
+    banner_data = []
+
+    for i, key in enumerate(ocr_texts):
+        if len(ocr_texts[key]) > 1:
+            select, all_select = select_text(ocr_texts[key])
+            classification, category, info = llm.process_banner_text(
+                " ".join(select), " ".join(all_select)
+            )
+            company_name, phone_number = extract_company_info(info)
+            print(classification)
+            if classification == "illegal":
+                banner_data.append(
+                        {
+                            #"text": " ".join(select),
+                            "classification": classification,
+                            "category": category,
+                            "company_name": company_name,
+                            "phone_number": str(phone_number),
+                            "coordinates": {
+                                "x": cropped[i][0],
+                                "y": cropped[i][1],
+                                "width": cropped[i][2],
+                                "height": cropped[i][3],
+                            },  # 해당 배너의 좌표 추가
+                        },
+                    )
+                
+    return banner_data
 
