@@ -1,7 +1,6 @@
 import cv2
 from yolo.yolo_utils import is_inside
 
-
 def resize_with_padding(image, target_size=(640, 640)):
     h, w = image.shape[:2]
     scale = min(target_size[0] / w, target_size[1] / h)
@@ -18,7 +17,7 @@ def resize_with_padding(image, target_size=(640, 640)):
 def crop_image(image, x, y, w, h):
     return image[int(y - h / 2):int(y + h / 2), int(x - w / 2):int(x + w / 2)]
 
-def cropped_banner(original_image, banners, holders, output_dir):
+def cropped_banner(original_image, banners, holders):
     cropped_banners = []
         
     for banner in banners:

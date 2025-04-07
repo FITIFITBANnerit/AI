@@ -136,6 +136,7 @@ class BannerTextClassifier:
         if category == "Commercial purposes":
             result = "illegal"
             info = self.extract_info(full_text)
+            print(info)
         else:
             result = "legal"
         
