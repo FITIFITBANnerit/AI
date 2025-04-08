@@ -50,11 +50,11 @@ class OCRPreprocessing:
 
     def image_preprocessing(self):
         """ 전체 전처리 과정 실행 """
-        img = self.converse_hsv(self.image)     # 배경 제거
-        img = self.gray_scale(img)              # Grayscale 변환
-        img = self.histogram_clahe(img)         # CLAHE 적용 (대비 증가)
-        img = self.sharpening(img)              # 샤프닝 적용 (필요할 경우)
-        img = self.remove_shadow(img)           # 그림자 제거
-        img = self.invert_colors(img)           # 색 반전 (배경이 어두운 경우)
-        img = self.apply_threshold(img)         # Thresholding 적용 (OCR 최적화)
-        return self.image
+
+        img = self.gray_scale(self.image)        # Grayscale 변환
+        #img = self.histogram_clahe(img)         # CLAHE 적용 (대비 증가)
+        #img = self.sharpening(img)              # 샤프닝 적용 (필요할 경우)
+        #img = self.remove_shadow(img)           # 그림자 제거
+        #img = self.invert_colors(img)           # 색 반전 (배경이 어두운 경우)
+        #img = self.apply_threshold(img)         # Thresholding 적용 (OCR 최적화)
+        return img

@@ -21,20 +21,21 @@ def analyze_banner_from_url(image_url: str):
     image = np.array(image)
     image = image[:, :, ::-1]
     
-    cropped = yolo_model.detect_banners(image)
-
+    banner_data = []
+    
+    cropped = yolo_model.detect_banners(image, banner_data)
     if not cropped:
-        print("No illegal banners detected.")
-        return {"banners": []}
+        print("No banners detected.")
+        return banner_data
 
     # OCR 실행
     results = ocr.run_ocr(image, cropped)
 
     if not results:
         print("No text detected in banners.")
-        return {"banners": []}
+        return banner_data
 
     # 현수막 분석
-    banner_data = analyze_banner_text(results, llm, cropped)
+    analyze_banner_text(results, llm, cropped, banner_data)
     
-    return {"banners": banner_data}
+    return banner_data

@@ -12,7 +12,7 @@ def select_text(text_list):
         min_x, min_y = min(x_coords), min(y_coords)
         max_x, max_y = max(x_coords), max(y_coords)
         height = max_y - min_y
-        if height >  banner_height * 0.15:
+        if height >  banner_height * 0.1:
             selected.append(text) 
                
         all_text.append(text)
@@ -46,10 +46,8 @@ def extract_company_info(info):
 
     return company_name, phone_number
 
-def analyze_banner_text(ocr_texts, llm, cropped):
+def analyze_banner_text(ocr_texts, llm, cropped, banner_data):
     """LLM을 이용하여 현수막의 불법 여부, 카테고리, 전화번호 및 회사명을 추출"""
-    banner_data = []
-
     for i, key in enumerate(ocr_texts):
         if len(ocr_texts[key]) > 1:
             select, all_select = select_text(ocr_texts[key])
@@ -57,12 +55,10 @@ def analyze_banner_text(ocr_texts, llm, cropped):
                 " ".join(select), " ".join(all_select)
             )
             company_name, phone_number = extract_company_info(info)
-            print(classification)
-            if classification == "illegal":
-                banner_data.append(
+            banner_data.append(
                         {
-                            #"text": " ".join(select),
-                            "classification": classification,
+                            "text": " ".join(select),
+                            "status": classification,
                             "category": category,
                             "company_name": company_name,
                             "phone_number": str(phone_number),
@@ -74,6 +70,4 @@ def analyze_banner_text(ocr_texts, llm, cropped):
                             },  # 해당 배너의 좌표 추가
                         },
                     )
-                
-    return banner_data
 

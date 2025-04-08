@@ -13,7 +13,7 @@ class YOLOModel:
     def predict(self, image):
         return self.model.predict(source = image)
     
-    def detect_banners(self, image):
+    def detect_banners(self, image, banner_data):
         """YOLO 모델을 사용하여 현수막을 탐지하고 좌표를 반환"""
         padded_image, scale, pad_x, pad_y = resize_with_padding(image)
 
@@ -24,7 +24,7 @@ class YOLOModel:
             class_id, boxes, 640, 640, scale, pad_x, pad_y
         )
 
-        return cropped_banner(image, banners, banner_holder)
+        return cropped_banner(image, banners, banner_holder, banner_data)
     
     
 """def detect_banners(yolo_model, image):
