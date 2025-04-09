@@ -19,9 +19,3 @@ def analyze(req: ImageRequest):
         "report_id": req.report_id,
         "banner_list": results[0] if len(results) == 1 else results
     }
-
-# uvicorn app:app --reload
-# http://localhost:8000/docs
-# /analyze -> image_url(http://localhost:8080/test.jpg)
-
-# 다른 터미널에서 python -m http.server 8080

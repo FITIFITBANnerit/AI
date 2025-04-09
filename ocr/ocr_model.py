@@ -1,6 +1,4 @@
 from paddleocr import PaddleOCR
-import requests
-import numpy as np
 
 from ocr.ocr_utils import OCRPreprocessing
 from utils.image_utils import crop_image

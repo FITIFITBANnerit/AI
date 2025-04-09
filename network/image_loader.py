@@ -1,7 +1,6 @@
 import requests
 from PIL import Image
 from io import BytesIO
-from config import IMAGE_URL
 import pillow_heif
 
 pillow_heif.register_heif_opener()

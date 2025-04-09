@@ -3,10 +3,10 @@ import re
 from transformers import AutoTokenizer, Gemma3ForCausalLM
 
 class BannerTextClassifier:
-    def __init__(self, model_name):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+    def __init__(self, llm_path):
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_path)
         self.model = Gemma3ForCausalLM.from_pretrained(
-    model_name, torch_dtype=torch.bfloat16)
+    llm_path, torch_dtype=torch.bfloat16)
         
     def classify_banner_text(self, selected_text):
         messages = [

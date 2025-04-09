@@ -1,7 +1,6 @@
-import cv2
 import numpy as np
 
-from config import API_URL, API_KEY, IMAGE_URL, MODEL_DIR, LLM_NAME
+from config import MODEL_DIR, LLM_DIR
 from llm.llm_model import BannerTextClassifier
 from llm.llm_utils import analyze_banner_text
 from ocr.ocr_model import OCRModel
@@ -13,7 +12,7 @@ def analyze_banner_from_url(image_url: str):
     # 모델 초기화
     yolo_model = YOLOModel(model_path=MODEL_DIR)
     ocr = OCRModel()
-    llm = BannerTextClassifier(LLM_NAME)
+    llm = BannerTextClassifier(LLM_DIR)
 
     # 이미지 로드 및 현수막 탐지
     image = load_image_from_url(image_url)

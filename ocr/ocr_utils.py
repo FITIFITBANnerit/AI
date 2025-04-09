@@ -1,9 +1,6 @@
 import cv2
 import numpy as np
 
-import cv2
-import numpy as np
-
 class OCRPreprocessing:
     def __init__(self, image, clipLimit=2.0, tileGridSize=(8,8), kernel=None):
         self.image = image
