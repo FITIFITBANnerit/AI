@@ -57,7 +57,6 @@ def analyze_banner_text(ocr_texts, llm, cropped, banner_data):
             company_name, phone_number = extract_company_info(info)
             banner_data.append(
                         {
-                           # "text": " ".join(select),
                             "status": classification,
                             "category": category,
                             "company_name": company_name,
