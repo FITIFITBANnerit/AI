@@ -7,16 +7,16 @@ from ocr.ocr_model import OCRModel
 from yolo.yolo_model import YOLOModel
 from network.image_loader import load_image_from_url
 
-def analyze_banner_from_url(image_url: str):
+def analyze_banner_from_url(image_url: str, app):
     """메인 실행 함수"""
-    # 모델 초기화
-    yolo_model = YOLOModel(model_path=MODEL_DIR)
-    ocr = OCRModel()
-    llm = BannerTextClassifier(LLM_DIR)
+    
+    # 미리 초기화된 모델 가져오기
+    yolo_model = app.state.yolo
+    ocr = app.state.ocr
+    llm = app.state.llm
 
     # 이미지 로드 및 현수막 탐지
     image = load_image_from_url(image_url)
-    #image = cv2.imread(IMAGE_URL)
     image = np.array(image)
     image = image[:, :, ::-1]
     
