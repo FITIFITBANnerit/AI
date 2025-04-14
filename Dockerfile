@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 WORKDIR /BANner_it_AI
 
-RUN apt-get update && apt-get install -y libgl1 libgl1-mesa-glx
+RUN apt-get update && apt-get install -y libgl1 libgl1-mesa-glx libglib2.0-0
 
 COPY requirements.txt .
 
