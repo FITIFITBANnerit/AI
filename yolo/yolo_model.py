@@ -3,11 +3,13 @@ from ultralytics import YOLO
 from utils.image_utils import cropped_banner, resize_with_padding
 from yolo.yolo_utils import save_cord
 
-
 class YOLOModel:
     def __init__(self, model_path=None):
-        self.model = YOLO(model_path, weights_only=False)
-        #self.client = InferenceHTTPClient(api_url, api_key)
+        try:
+            self.model = YOLO(model_path)
+        except Exception as e:
+            print(f"Error loading YOLO model: {e}")
+        raise
     
     def predict(self, image):
         return self.model.predict(source = image)
