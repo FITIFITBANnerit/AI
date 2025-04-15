@@ -1,0 +1,11 @@
+# .dockerignore 예시
+.git
+.gitignore
+*.pyc
+__pycache__
+*.env
+node_modules
+*.log
+*.md
+*.yml
+*.gitmodules

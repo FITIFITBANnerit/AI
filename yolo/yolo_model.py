@@ -7,9 +7,9 @@ class YOLOModel:
     def __init__(self, model_path=None):
         try:
             self.model = YOLO(model_path)
+            print("Model loaded succeessfully.")
         except Exception as e:
             print(f"Error loading YOLO model: {e}")
-        raise
     
     def predict(self, image):
         return self.model.predict(source = image)
