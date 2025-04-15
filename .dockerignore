@@ -1,5 +1,4 @@
 # .dockerignore 예시
-.git
 .gitignore
 *.pyc
 __pycache__
