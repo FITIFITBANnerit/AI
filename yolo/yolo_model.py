@@ -6,7 +6,7 @@ from yolo.yolo_utils import save_cord
 
 class YOLOModel:
     def __init__(self, model_path=None):
-        self.model = YOLO(model_path, weights_only=True)
+        self.model = YOLO(model_path, weights_only=False)
         #self.client = InferenceHTTPClient(api_url, api_key)
     
     def predict(self, image):
