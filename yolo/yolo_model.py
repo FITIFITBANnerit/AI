@@ -1,7 +1,11 @@
+from torch.serialization import add_safe_globals
+
 from ultralytics import YOLO
 
 from utils.image_utils import cropped_banner, resize_with_padding
 from yolo.yolo_utils import save_cord
+
+add_safe_globals([YOLO])
 
 class YOLOModel:
     def __init__(self, model_path=None):
