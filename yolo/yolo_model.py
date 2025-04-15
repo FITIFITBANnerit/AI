@@ -1,15 +1,12 @@
-from torch.serialization import add_safe_globals
-
 from ultralytics import YOLO
 
 from utils.image_utils import cropped_banner, resize_with_padding
 from yolo.yolo_utils import save_cord
 
-add_safe_globals([YOLO])
 
 class YOLOModel:
     def __init__(self, model_path=None):
-        self.model = YOLO(model_path)
+        self.model = YOLO(model_path, weights_only=True)
         #self.client = InferenceHTTPClient(api_url, api_key)
     
     def predict(self, image):
