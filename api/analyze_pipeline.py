@@ -28,7 +28,7 @@ def analyze_banner_from_url(image_url: str, app):
         return banner_data
 
     # OCR 실행
-    results = ocr.run_ocr(image, cropped)
+    results, banner_data = ocr.run_ocr(image, cropped, banner_data)
 
     if not results:
         print("No text detected in banners.")
