@@ -8,7 +8,7 @@ class OCRModel:
         self.lang = lang
         self._ocr = PaddleOCR(lang="korean", show_log=False)
 
-    def run_ocr(self, original_image, images_cord):
+    def run_ocr(self, original_image, images_cord, banner_data):
         ocr_results = {}
         for i, cord in enumerate(images_cord):
             
@@ -22,7 +22,19 @@ class OCRModel:
                 ocr_results[i] = result[0]
                 ocr_results[i].append((cord[2], cord[3])) # 배너 너비, 높이 추가
             else:
-                ocr_results[i] = ["Can't detection text!!"]
-        return ocr_results
+                banner_data.append({
+                    "status": "CAN'T FIND TEXT",
+                    "category": "banner",
+                    "company_name": "",
+                    "phone_number": "",
+                    "coordinates":{
+                        "x": cord[0],
+                        "y": cord[1],
+                        "width": cord[2],
+                        "height": cord[3],
+                    }
+                })
+                ocr_results[i] = "NO_TEXT"
+        return ocr_results, banner_data
         
         
