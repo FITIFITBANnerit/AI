@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  banner_api:
+    build: .
+    container_name: banner_api
+    ports:
+      - "8000:8000"
+    restart: always
+    volumes:
+      - .:/BANner_it_AI
