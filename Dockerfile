@@ -2,7 +2,7 @@
 FROM python:3.10-slim as builder
 
 RUN apt-get update && apt-get install -y git git-lfs && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN git lfs install --global
+RUN git lfs install
  
 WORKDIR /BANner_it_AI  # 현재 디렉토리 맞추기
 
