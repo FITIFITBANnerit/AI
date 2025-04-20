@@ -12,7 +12,7 @@ RUN git lfs pull
 # ---- Final Stage ----
 FROM python:3.10-slim
     
-WORKDIR /BANner_it_AI  # 실행할 디렉토리
+WORKDIR /BANner_it_AI
 
 RUN apt-get update && apt-get install -y \
     libgl1 \
