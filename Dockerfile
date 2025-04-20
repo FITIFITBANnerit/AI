@@ -1,22 +1,33 @@
-FROM python:3.10-slim
+# ---- Builder Stage ----
+FROM python:3.10-slim as builder
 
-WORKDIR /BANner_it_AI
+RUN apt-get update && apt-get install -y git git-lfs && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN git lfs install --global
+ 
+WORKDIR /BANner_it_AI  # 현재 디렉토리 맞추기
+
+COPY . .
+RUN git lfs pull
+
+# ---- Final Stage ----
+FROM python:3.10-slim
+    
+WORKDIR /BANner_it_AI  # 실행할 디렉토리
 
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    git-lfs \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
-RUN git lfs install
 
-COPY . .
+COPY --from=builder /BANner_it_AI /BANner_it_AI 
 
-RUN git lfs pull
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+    
+    
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
+    
