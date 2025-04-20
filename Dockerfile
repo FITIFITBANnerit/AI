@@ -4,7 +4,7 @@ FROM python:3.10-slim as builder
 RUN apt-get update && apt-get install -y git git-lfs && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN git lfs install
  
-WORKDIR /BANner_it_AI  # 현재 디렉토리 맞추기
+WORKDIR /app
 
 COPY . .
 RUN git lfs pull
@@ -12,7 +12,7 @@ RUN git lfs pull
 # ---- Final Stage ----
 FROM python:3.10-slim
     
-WORKDIR /BANner_it_AI
+WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     libgl1 \
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY --from=builder /BANner_it_AI /BANner_it_AI 
+COPY --from=builder /app /app
 
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
     
