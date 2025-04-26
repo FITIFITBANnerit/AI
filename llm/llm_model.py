@@ -70,7 +70,7 @@ class BannerTextClassifier:
         generation = self.model.generate(**inputs, max_new_tokens=100, do_sample=False)
         generation = generation[0][input_len:]
         
-        decoded = self.tokenizer.decode(generation, skip_sepcial_tokens=True)
+        decoded = self.tokenizer.decode(generation, skip_special_tokens=True)
         
         return decoded
 
