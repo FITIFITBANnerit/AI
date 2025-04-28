@@ -124,6 +124,7 @@ class BannerTextClassifier:
 
     def process_banner_text(self, selected_text, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
+        print(selected_text)
         classification_result = self.classify_banner_text(selected_text)
         info = None
         
