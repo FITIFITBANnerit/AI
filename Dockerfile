@@ -10,7 +10,7 @@ COPY . .
 RUN git lfs pull
 
 # ---- Final Stage ----
-FROM python:3.10-slim
+FROM ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0
     
 WORKDIR /app
 

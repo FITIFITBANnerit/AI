@@ -54,7 +54,6 @@ opencv-python-headless==4.11.0.86
 opt-einsum==3.3.0
 packaging==24.2
 paddleocr==2.10.0
-paddlepaddle==3.0.0
 pandas==2.2.3
 parso==0.8.4
 pexpect==4.9.0
