@@ -10,7 +10,7 @@ COPY . .
 RUN git lfs pull
 
 # ---- Final Stage ----
-FROM ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0
+FROM python:3.10-slim
     
 WORKDIR /app
 
@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+ 
+ RUN pip install paddlepaddle==2.5.2 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
