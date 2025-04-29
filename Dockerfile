@@ -20,8 +20,8 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
- 
- RUN pip install paddlepaddle==2.5.2 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
+
+RUN pip install paddlepaddle==2.5.2 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
