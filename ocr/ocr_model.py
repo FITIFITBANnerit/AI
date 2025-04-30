@@ -23,7 +23,7 @@ class OCRModel:
                 ocr_results[i].append((cord[2], cord[3])) # 배너 너비, 높이 추가
             else:
                 banner_data.append({
-                    "status": "Unknown",
+                    "status": "UNKNOWN",
                     "category": "banner",
                     "company_name": "",
                     "phone_number": "",

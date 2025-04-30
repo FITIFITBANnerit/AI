@@ -132,13 +132,13 @@ class BannerTextClassifier:
         match = re.search(r'Category:\s*"([^"]+)"', classification_result)
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
-        category = match.group(1) if match else "Unknown"
+        category = match.group(1) if match else "UNKNOWN"
         
         if category == "Commercial purposes":
-            result = "illegal"
+            result = "ILLEGAL"
             info = self.extract_info(full_text)
         else:
-            result = "legal"
+            result = "LEGAL"
         
         return result, category, info
                 
