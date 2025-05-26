@@ -2,11 +2,45 @@ from paddleocr import PaddleOCR
 
 from ocr.ocr_utils import OCRPreprocessing
 from utils.image_utils import crop_image
+import numpy as np
 
 class OCRModel:
     def __init__(self, lang: str = "korean", **kwargs):
         self.lang = lang
         self._ocr = PaddleOCR(lang="korean", show_log=False)
+
+    def line_length(self, p1, p2):
+        return np.linalg.norm(np.array(p1) - np.array(p2))
+
+    def summarize_ocr_result(self, ocr_result):
+        summarized = []
+
+        for item in ocr_result:
+            box, (text, conf) = item
+            if not text.strip():
+                continue
+
+            # 중심 좌표
+            x_coords = [pt[0] for pt in box]
+            y_coords = [pt[1] for pt in box]
+            cx = np.mean(x_coords)
+            cy = np.mean(y_coords)
+
+            # font 크기 추정 (좌우 세로 edge 평균 길이)
+            left_height = self.line_length(box[0], box[3])
+            right_height = self.line_length(box[1], box[2])
+            avg_font_size = (left_height + right_height) / 2
+
+            summarized.append({
+                "text": text,
+                "font_size": round(float(avg_font_size), 2),
+                "center": [round(float(cx), 1), round(float(cy), 1)],
+                "conf": round(float(conf), 2)
+            })
+
+        # 폰트 크기 기준 정렬 (큰 글씨 우선)
+        summarized.sort(key=lambda x: -x["font_size"])
+        return summarized
 
     def run_ocr(self, original_image, images_cord, banner_data):
         ocr_results = {}
@@ -19,8 +53,8 @@ class OCRModel:
             result = self._ocr.ocr(preprocessing_image, cls=False)
             
             if result[0] != None:
-                ocr_results[i] = result[0]
-                ocr_results[i].append((cord[2], cord[3])) # 배너 너비, 높이 추가
+                res = self.summarize_ocr_result(result[0])
+                ocr_results[i] = res
             else:
                 banner_data.append({
                     "status": "UNKNOWN",

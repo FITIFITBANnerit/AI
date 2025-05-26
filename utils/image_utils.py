@@ -52,12 +52,9 @@ def cropped_banner(original_image, banners, holders, bus, banner_data):
                         "category": "banner_in_holder",
                         "company_name": "",
                         "phone_number": "",
-                        "coordinates":{
-                            "x": banner['x'],
-                            "y": banner['y'],
-                            "width": banner['width'],
-                            "height": banner['height'],
-                        }
+                        "center": [float(banner['x']), float(banner['y'])],
+                        'width': float(banner['width']),
+                        'height': float(banner['height'])
                     }
                 )
                 is_legal = True

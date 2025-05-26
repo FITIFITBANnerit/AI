@@ -1,26 +1,5 @@
 import re
 
-def select_text(text_list):
-    selected = []
-    all_text = []
-    banner_height = text_list.pop()[1]
-    
-    for bbox, (text, confidence) in text_list:
-        # 네 개의 좌표 분리
-        x_coords, y_coords = zip(*bbox)
-        # 사각형의 최소 x, y 좌표 및 너비, 높이 계산
-        min_x, min_y = min(x_coords), min(y_coords)
-        max_x, max_y = max(x_coords), max(y_coords)
-        height = max_y - min_y
-        if height >  banner_height * 0.1:
-            selected.append(text) 
-               
-        all_text.append(text)
-    if len(selected) == 0:
-        selected = all_text
-        
-    return selected, all_text
-
 def extract_company_info(info):
     """LLM 결과에서 회사명과 전화번호를 추출"""
     
@@ -52,9 +31,8 @@ def analyze_banner_text(ocr_texts, llm, cropped, banner_data):
         if ocr_texts[key] == "NO_TEXT":
             continue
         elif len(ocr_texts[key]) > 1:
-            select, all_select = select_text(ocr_texts[key])
             classification, category, info = llm.process_banner_text(
-                " ".join(select), " ".join(all_select)
+                ocr_texts[key]
             )
             company_name, phone_number = extract_company_info(info)
             banner_data.append(
@@ -63,12 +41,9 @@ def analyze_banner_text(ocr_texts, llm, cropped, banner_data):
                             "category": category,
                             "company_name": company_name,
                             "phone_number": str(phone_number),
-                            "coordinates": {
-                                "x": cropped[i][0],
-                                "y": cropped[i][1],
-                                "width": cropped[i][2],
-                                "height": cropped[i][3],
-                            },  # 해당 배너의 좌표 추가
+                            "center": [float(cropped[i][0]), float(cropped[i][1])],
+                            'width': float(cropped[i][2]),
+                            'height': float(cropped[i][3]), # 해당 배너의 좌표 추가
                         },
                     )
 
