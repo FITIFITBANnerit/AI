@@ -12,7 +12,7 @@ class OCRModel:
         ocr_results = {}
         for i, cord in enumerate(images_cord):
             
-            image = crop_image(original_image, cord[0], cord[1], cord[2], cord[3])  # banner 부분만 추출
+            image = crop_image(original_image, cord)  # banner 부분만 추출
             
             ocr_preprocessing = OCRPreprocessing(image)
             preprocessing_image = ocr_preprocessing.image_preprocessing()

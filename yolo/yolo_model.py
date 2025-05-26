@@ -21,8 +21,9 @@ class YOLOModel:
         predictions = self.model.predict(padded_image)
         class_id = predictions[0].boxes.cls.cpu().numpy()
         boxes = predictions[0].boxes.xywh.cpu().numpy()
-        banners, banner_holder = save_cord(
-            class_id, boxes, 640, 640, scale, pad_x, pad_y
+        masks = predictions[0].masks.xy     # mask 추가
+        banners, banner_holder, bus = save_cord(
+            class_id, boxes, masks, 640, 640, scale, pad_x, pad_y
         )
 
-        return cropped_banner(image, banners, banner_holder, banner_data)
+        return cropped_banner(image, banners, banner_holder, bus, banner_data)
