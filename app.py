@@ -9,7 +9,7 @@ from llm.llm_download import download_model_from_s3
 from llm.llm_model import BannerTextClassifier
 from ocr.ocr_model import OCRModel
 from yolo.yolo_model import YOLOModel
-from config import MODEL_DIR, LLM_DIR
+from config import MODEL_DIR, LLM_BASE_DIR, LLM_ADAPTER_DIR
 
 # lifespan 컨텍스트 매니저 정의
 @asynccontextmanager
@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     # 모델 초기화
     app.state.yolo = YOLOModel(model_path=MODEL_DIR)
     app.state.ocr = OCRModel()
-    app.state.llm = BannerTextClassifier(LLM_DIR)  # 객체 반환하도록 수정 필요
+    app.state.llm = BannerTextClassifier(LLM_BASE_DIR, LLM_ADAPTER_DIR)  # 객체 반환하도록 수정 필요
 
     print("✅ All models initialized.")
     yield
