@@ -5,18 +5,24 @@ import re
 
 class BannerTextClassifier:
     def __init__(self, llm_base_path, llm_adapter_path):
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        
         self.base_model = AutoModelForCausalLM.from_pretrained(
             llm_base_path,
             trust_remote_code=True,
             torch_dtype=torch.bfloat16, # 원본 모델에 맞는 데이터 타입을 지정하는 것이 좋습니다.
-            device_map="auto" # 여러 GPU에 모델을 분산 로드
-            )
+            device_map="auto" if device == "cuda" else None # 여러 GPU에 모델을 분산 로드
+            ).to(device)
+        
         self.tokenizer = AutoTokenizer.from_pretrained(llm_base_path, trust_remote_code=True)
         self.model = PeftModel.from_pretrained(
             self.base_model,
             llm_adapter_path,
-            torch_dtype=torch.bfloat16, # 원본 모델에 맞는 데이터 타입을 지정하는 것이 좋습니다.
-        )
+            torch_dtype=torch.bfloat16,
+        ).to(device)
+        
+        self.device = device
+        
     def classify_banner_text(self, full_text):
         prompt = """
                     Classify a banner into:
@@ -43,8 +49,8 @@ class BannerTextClassifier:
                     Answer: or <|assistant|>
                 """
         
-        full_prompt = prompt.format(banner_info=full_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.model.device)
+        full_prompt = prompt.format(full_text=full_text)
+        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
         
         outputs = self.model.generate(
             **inputs,
@@ -89,12 +95,12 @@ class BannerTextClassifier:
                     
                 """
                 
-        full_prompt = prompt.format(banner_info=full_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.model.device)
+        full_prompt = prompt.format(full_text=full_text)
+        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
         
         outputs = self.base_model.generate(
             **inputs,
-            max_new_tokens=100, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            max_new_tokens=50, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
             eos_token_id=self.tokenizer.eos_token_id
         )
         
@@ -102,7 +108,7 @@ class BannerTextClassifier:
         
         return response_text
     
-    def nomalize(self, text):
+    def normalize(self, text):
         low_text = text.lower()
         if 'politics' in low_text:
             return 'Politics'
@@ -119,7 +125,7 @@ class BannerTextClassifier:
         info = None
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
-        category = self.nomalize(classification_result)
+        category = self.normalize(classification_result)
         
         if category == "Commercial purposes":
             result = "ILLEGAL"
