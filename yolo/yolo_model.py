@@ -2,23 +2,26 @@ from ultralytics import YOLO
 
 from utils.image_utils import cropped_banner, resize_with_padding
 from yolo.yolo_utils import save_cord
+import torch
 
 class YOLOModel:
     def __init__(self, model_path=None):
         try:
+            self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
             self.model = YOLO(model_path)
+            self.model.to(self.device)
             print("Model loaded succeessfully.")
         except Exception as e:
             print(f"Error loading YOLO model: {e}")
     
     def predict(self, image):
-        return self.model.predict(source = image)
+        return self.model.predict(source = image, device=self.device)
     
     def detect_banners(self, image, banner_data):
         """YOLO 모델을 사용하여 현수막을 탐지하고 좌표를 반환"""
         padded_image, scale, pad_x, pad_y = resize_with_padding(image)
 
-        predictions = self.model.predict(padded_image)
+        predictions = self.predict(padded_image)
         class_id = predictions[0].boxes.cls.cpu().numpy()
         boxes = predictions[0].boxes.xywh.cpu().numpy()
         masks = predictions[0].masks.xy     # mask 추가
