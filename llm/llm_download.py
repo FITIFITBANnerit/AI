@@ -38,7 +38,7 @@ def download_model_from_s3():
         "adapter_config.json",
         "adapter_model.safetensors",
         "added_tokens.json",
-        "merges_txt",
+        "merges.txt",
         "README.md",
         "special_tokens_map.json",
         "tokenizer_config.json",
