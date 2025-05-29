@@ -35,8 +35,8 @@ class BannerTextClassifier:
 
                     Guidelines:
                     - Politics: mentions of politicians, parties, elections (e.g., 국민의힘, 이재명)
-                    - Public interest: events or announcements (e.g., 축제, 헌혈, 환경)
-                    - Commercial purposes: ads or services (e.g., 세일, 병원, 학원)
+                    - Public interest: events or announcements (e.g. 축제, 헌혈, 환경)
+                    - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측)
                     - Other: anything unclear or unrelated
 
                     Instructions:
