@@ -129,7 +129,7 @@ class BannerTextClassifier:
         
         if category == "Commercial purposes":
             result = "ILLEGAL"
-            info = self.extract_info(" ".join(full_text))
+            info = self.extract_info(full_text)
 
         else:
             result = "LEGAL"
