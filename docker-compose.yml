@@ -5,10 +5,5 @@ services:
     ports:
       - "80:80"
     restart: always
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - drive: nvidia
-              count: all
-              capabilities: [gpu]
+    volumes:
+      - .:/BANner_it_AI
