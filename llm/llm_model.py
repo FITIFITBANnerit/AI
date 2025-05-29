@@ -36,7 +36,7 @@ class BannerTextClassifier:
                     Guidelines:
                     - Politics: mentions of politicians, parties, elections (e.g., 국민의힘, 이재명)
                     - Public interest: events or announcements (e.g. 축제, 헌혈, 환경)
-                    - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측)
+                    - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측,오픈기념, 테이블당, 공짜)
                     - Other: anything unclear or unrelated
 
                     **Important**:
@@ -62,13 +62,13 @@ class BannerTextClassifier:
         
         outputs = self.model.generate(
             **inputs,
-            max_new_tokens=20, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            max_new_tokens=100, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
             eos_token_id=self.tokenizer.eos_token_id
         )
         
         response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         
-        return response_text.strip()
+        return response_text
 
     def extract_info(self, full_text):
         no_info_text = "Not detected"
