@@ -39,6 +39,14 @@ class BannerTextClassifier:
                     - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측)
                     - Other: anything unclear or unrelated
 
+                    **Important**:
+                    - If any word in the input is similar to the commercial keywords(e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측) above (even if the spelling is slightly incorrect, e.g., "찡크대", "쒸크대", "가굳마트"), you must **unconditionally classify** the banner as **Commercial purposes**.
+                    - Consider common OCR errors such as:
+                    * 'ㅅ' ↔ 'ㅊ' (e.g., 씽 ↔ 찡)
+                    * 'ㄱ' ↔ 'ㅋ', 'ㄷ' ↔ 'ㅌ'
+                    * spacing and hyphen issues
+                    * Latin letter confusion (e.g., 'O' ↔ '0', 'l' ↔ '1')
+  
                     Instructions:
                     - Prioritize blocks with largest font size and highest confidence
                     - Use center (x, y) to determine visual reading order (top-to-bottom, left-to-right)
