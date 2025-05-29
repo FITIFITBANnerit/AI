@@ -9,6 +9,10 @@ services:
       resources:
         reservations:
           devices:
-            - drive: nvidia
+            - driver: nvidia
               count: all
               capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    runtime: nvidia
