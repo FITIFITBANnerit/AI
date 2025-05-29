@@ -26,7 +26,6 @@ RUN python3 -m pip install paddlepaddle-gpu==2.6.2.post120 -i https://www.paddle
 RUN python3 -m pip install paddleocr==2.10.0
 RUN python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 RUN python3 -m pip install ultralytics transformers==4.51.1 peft==0.14.0 trl==0.17.0
-RUN python3 -m pip install einops timm
 
 COPY requirements.txt .
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
