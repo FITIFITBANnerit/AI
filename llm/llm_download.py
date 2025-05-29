@@ -48,25 +48,39 @@ def download_model_from_s3():
 
     for file_name in base_model_files:
         local_path = os.path.join(local_base_model_dir, file_name)
+        s3_key = s3_base_model_prefix + file_name # S3 전체 키
+        print(f"Attempting to download from S3: Bucket='{bucket_name}', Key='{s3_key}' to Local='{local_path}'") # 추가된 로그
         if os.path.exists(local_path):
-            continue  # 이미 존재하면 생략
-        s3.download_file(
-            Bucket=bucket_name,
-            Key=s3_base_model_prefix + file_name,
-            Filename=local_path
-        )
-        print(f"✅ Downloaded {file_name}")
+            print(f"Skipping, already exists: {local_path}") # 이미 존재 시 스킵 로그
+            continue
+        try:
+            s3.download_file(
+                Bucket=bucket_name,
+                Key=s3_key, # 수정된 부분
+                Filename=local_path
+            )
+            print(f"✅ Downloaded {file_name}")
+        except Exception as e:
+            print(f"❌ FAILED to download {file_name} from S3 key {s3_key}. Error: {e}") # 오류 발생 시 로그
+            raise
         
     for file_name in adapter_model_files:
         local_path = os.path.join(local_adapter_model_dir, file_name)
+        s3_key = s3_adapter_model_prefix + file_name # S3 전체 키
+        print(f"Attempting to download from S3: Bucket='{bucket_name}', Key='{s3_key}' to Local='{local_path}'") # 추가된 로그
         if os.path.exists(local_path):
-            continue  # 이미 존재하면 생략
-        s3.download_file(
-            Bucket=bucket_name,
-            Key=s3_adapter_model_prefix + file_name,
-            Filename=local_path
-        )
-        print(f"✅ Downloaded {file_name}")
+            print(f"Skipping, already exists: {local_path}") # 이미 존재 시 스킵 로그
+            continue
+        try:
+            s3.download_file(
+                Bucket=bucket_name,
+                Key=s3_key, # 수정된 부분
+                Filename=local_path
+            )
+            print(f"✅ Downloaded {file_name}")
+        except Exception as e:
+            print(f"❌ FAILED to download {file_name} from S3 key {s3_key}. Error: {e}") # 오류 발생 시 로그
+            raise
 
     return local_base_model_dir, local_adapter_model_dir
 
