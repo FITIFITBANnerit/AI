@@ -149,6 +149,7 @@ class BannerTextClassifier:
 
             # 최종 텍스트
             text = '\n'.join(lines)
+            print("ocr_text(process): ", text)
             info = self.extract_info(text)
 
         else:
