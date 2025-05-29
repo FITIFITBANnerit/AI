@@ -2,7 +2,6 @@ from transformers import AutoModelForCausalLM, AutoProcessor, AutoTokenizer
 import torch
 from peft import PeftModel
 import re
-import json
 
 class BannerTextClassifier:
     def __init__(self, llm_base_path, llm_adapter_path):
@@ -36,8 +35,8 @@ class BannerTextClassifier:
 
                     Guidelines:
                     - Politics: mentions of politicians, parties, elections (e.g., 국민의힘, 이재명)
-                    - Public interest: events or announcements (e.g., 축제, 헌혈, 환경)
-                    - Commercial purposes: ads or services (e.g., 세일, 병원, 학원)
+                    - Public interest: events or announcements (e.g. 축제, 헌혈, 환경)
+                    - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측)
                     - Other: anything unclear or unrelated
 
                     Instructions:
@@ -64,39 +63,37 @@ class BannerTextClassifier:
         return response_text.strip()
 
     def extract_info(self, full_text):
-        no_info_placeholder_value = "Not detected"
+        no_info_text = "Not detected"
         
         prompt = """
                     
-                    You are an expert data extractor specializing in analyzing unstructured text from OCR (Optical Character Recognition) scans. Your task is to accurately extract the company/store name and phone number from the provided text. The text may contain OCR errors, so be prepared to correct common mistakes.
+                    You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Your task is to extract key business information from the text.
 
-                    **Source Text:**
-                    `{banner_info}`
+                    **Source Text (line-sorted OCR output):**
+                    {banner_info}
 
                     **Instructions:**
 
-                    1.  **Company/Store Name:**
-                        * Identify the most likely name of the business, store, restaurant, or service.
-                        * This is often indicated by larger font size, a logo, or keywords like "마트" (Mart), "의원" (Clinic), "가구" (Furniture), "컴퍼니" (Company), etc.
-                        * If multiple potential names exist, choose the most prominent one.
+                    1. **Company/Store Name**
+                    - Find the most likely name of the company, store, restaurant, or service.
+                    - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과", etc.
+                    - If multiple candidates exist, pick the one that appears near the top of the text or has a promotional tone.
 
-                    2.  **Phone Number:**
-                        * Scan for any sequence of digits that resembles a phone number (e.g., `XXX-XXXX-XXXX`, `(0XX) XXX-XXXX`, `010.XXXX.XXXX`).
-                        * Correct common OCR errors, such as mistaking 'O' for '0', 'l' for '1', or ignoring spaces/hyphens. For example, if you see `O1O-1234-5b78`, you should interpret it as `010-1234-5678`.
-                        * If there are multiple numbers, prioritize the main business landline or mobile number over fax or secondary numbers.
+                    2. **Phone Number**
+                    - Detect any phone number in common formats (e.g., `010-XXXX-XXXX`, `(02) XXXX-XXXX`, etc).
+                    - Correct common OCR mistakes: e.g., 'O' → '0', 'l' → '1', etc.
+                    - If there are multiple numbers, choose the main contact number, not fax or secondary lines.
 
-                    3.  **Output Format:**
-                        * You MUST strictly follow the format below.
-                        * If a piece of information cannot be found, use the value `{no_info}`.
+                    3. **Output Format**
+                    You MUST return the result strictly in the format below:
 
-                    **Output:**
-                    ```
-                    "Company": "Company Name",
-                    "Phone Number": "Phone Number"
+                    "Company": "Extracted Company Name or {no_info}",
+                    "Phone Number": "Extracted Phone Number or {no_info}"
+                    
                     
                 """
                 
-        full_prompt = prompt.format(banner_info=full_text)
+        full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
         inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
         
         outputs = self.base_model.generate(
@@ -107,30 +104,7 @@ class BannerTextClassifier:
         
         response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         
-        try:
-            # 수정: 모델이 반환한 JSON 문자열을 파이썬 딕셔너리로 파싱
-            # 모델이 항상 완벽한 JSON을 반환하지 않을 수 있으므로, 추가적인 정제나 오류 처리가 필요할 수 있습니다.
-            # 예: 모델이 JSON 앞뒤로 불필요한 텍스트를 추가하는 경우 정규식 등으로 JSON 부분만 추출
-            # 여기서는 모델이 지시를 잘 따라 순수 JSON 문자열만 반환한다고 가정합니다.
-            
-            # 간혹 모델이 markdown 코드 블록 ```json ... ``` 안에 JSON을 넣는 경우가 있으므로 제거 시도
-            if response_text.startswith("```json"):
-                response_text = response_text[len("```json"):].strip()
-            if response_text.startswith("```"):
-                 response_text = response_text[len("```"):].strip()
-            if response_text.endswith("```"):
-                response_text = response_text[:-len("```")].strip()
-
-            return json.loads(response_text)
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON from LLM response: {e}")
-            print(f"Raw response text: {response_text}")
-            # 오류 발생 시 기본값 반환
-            return {"Company": no_info_placeholder_value, "Phone Number": no_info_placeholder_value, "Error": "JSON Decode Error"}
-        except Exception as e_gen: # 다른 예외 처리
-            print(f"An unexpected error occurred during info extraction: {e_gen}")
-            print(f"Raw response text: {response_text}")
-            return {"Company": no_info_placeholder_value, "Phone Number": no_info_placeholder_value, "Error": str(e_gen)}
+        return response_text.strip()
     
     def normalize(self, text):
         low_text = text.lower()
@@ -146,24 +120,41 @@ class BannerTextClassifier:
     def process_banner_text(self, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
         classification_result = self.classify_banner_text(full_text)
-        formatted_info_string = None
+        info = None
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
         category = self.normalize(classification_result)
         
         if category == "Commercial purposes":
             result = "ILLEGAL"
-            info_dict = self.extract_info(" ".join(full_text))
-            
-            company_name = info_dict.get("Company", "Not detected")
-            phone_number = info_dict.get("Phone Number", "Not detected")
-            if "Error" in info_dict: # 정보 추출 중 오류가 있었다면 오류 메시지도 포함
-                 formatted_info_string = f"Company: {company_name}, Phone: {phone_number}, ExtractionError: {info_dict.get('Error')}"
-            else:
-                 formatted_info_string = f"Company: {company_name}, Phone: {phone_number}"
+            sorted_items = sorted(full_text, key=lambda o: (round(o['center'][1] / 10), o['center'][0]))
+
+            # 줄 단위로 하나의 문자열 만들기
+            lines = []
+            current_y = None
+            line = []
+
+            for item in sorted_items:
+                y = round(item['center'][1] / 10)  # y값 비슷한 건 같은 줄로 처리
+                if current_y is None or y == current_y:
+                    line.append(item['text'])
+                else:
+                    lines.append(' '.join(line))
+                    line = [item['text']]
+                current_y = y
+
+            # 마지막 줄 추가
+            if line:
+                lines.append(' '.join(line))
+
+            # 최종 텍스트
+            text = '\n'.join(lines)
+            print("ocr_text(process): ", text)
+            info = self.extract_info(text)
+
         else:
             result = "LEGAL"
         
-        return result, category, formatted_info_string
+        return result, category, info
                 
                 

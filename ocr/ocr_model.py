@@ -42,7 +42,7 @@ class OCRModel:
         summarized.sort(key=lambda x: -x["font_size"])
         return summarized
 
-    def run_ocr(self, original_image, images_cord, banner_data):
+    def run_ocr(self, original_image, images_cord, banner_data, cropped_info):
         ocr_results = {}
         for i, cord in enumerate(images_cord):
             
@@ -61,12 +61,9 @@ class OCRModel:
                     "category": "banner",
                     "company_name": "",
                     "phone_number": "",
-                    "coordinates":{
-                        "x": cord[0],
-                        "y": cord[1],
-                        "width": cord[2],
-                        "height": cord[3],
-                    }
+                    "center": [float(cropped_info[i][0]), float(cropped_info[i][1])],
+                    'width': float(cropped_info[i][2]),
+                    'height': float(cropped_info[i][3]), # 해당 배너의 좌표 추가
                 })
                 ocr_results[i] = "NO_TEXT"
         return ocr_results, banner_data

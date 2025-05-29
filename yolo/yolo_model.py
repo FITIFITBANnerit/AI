@@ -19,14 +19,17 @@ class YOLOModel:
     
     def detect_banners(self, image, banner_data):
         """YOLO 모델을 사용하여 현수막을 탐지하고 좌표를 반환"""
+        height, width = image.shape[:2]
         padded_image, scale, pad_x, pad_y = resize_with_padding(image)
 
         predictions = self.predict(padded_image)
+        if predictions[0].masks is None or not predictions[0].masks.xy:
+            return [], []
         class_id = predictions[0].boxes.cls.cpu().numpy()
         boxes = predictions[0].boxes.xywh.cpu().numpy()
         masks = predictions[0].masks.xy     # mask 추가
         banners, banner_holder, bus = save_cord(
-            class_id, boxes, masks, 640, 640, scale, pad_x, pad_y
+            class_id, boxes, masks, 640, 640, scale, pad_x, pad_y, height, width
         )
 
         return cropped_banner(image, banners, banner_holder, bus, banner_data)
