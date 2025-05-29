@@ -63,7 +63,7 @@ class BannerTextClassifier:
         return response_text.strip()
 
     def extract_info(self, full_text):
-        no_info_placeholder_value = "Not detected"
+        no_info_text = "Not detected"
         
         prompt = """
                     
@@ -95,7 +95,7 @@ class BannerTextClassifier:
                     
                 """
                 
-        full_prompt = prompt.format(banner_info=full_text)
+        full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
         inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
         
         outputs = self.base_model.generate(
