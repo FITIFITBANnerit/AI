@@ -61,12 +61,9 @@ class OCRModel:
                     "category": "banner",
                     "company_name": "",
                     "phone_number": "",
-                    "coordinates":{
-                        "x": cord[0],
-                        "y": cord[1],
-                        "width": cord[2],
-                        "height": cord[3],
-                    }
+                    "center": [float(cord[0]), float(cord[1])],
+                    'width': float(cord[2]),
+                    'height': float(cord[3]), # 해당 배너의 좌표 추가
                 })
                 ocr_results[i] = "NO_TEXT"
         return ocr_results, banner_data

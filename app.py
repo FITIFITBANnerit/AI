@@ -40,9 +40,8 @@ def analyze(req: ImageRequest):
     results = []
     for url in req.image_urls:
         result = analyze_banner_from_url(url, app) # req.image_url에 URL 저장
-        print(result)
+        print("Result:", result)
         results.append(result)
-    
     return {
         "report_id": req.report_id,
         "banner_list": results[0] if len(results) == 1 else results
