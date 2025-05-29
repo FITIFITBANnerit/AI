@@ -48,12 +48,10 @@ def analyze(req: ImageRequest):
         flat_banner_list.extend(single_url_result_list)
         
     print(f"report_id: {req.report_id}, flat_banner_list: {flat_banner_list}, count: {len(flat_banner_list)}")
-        
-    potential_banner_list_content = results[0] if len(results) == 1 else results
     
     final_banner_list_for_response = None if not flat_banner_list else flat_banner_list
         
-    print(f"report_id: {req.report_id}, flat_banner_list: {final_banner_list_for_response}")
+    print(f"report_id: {req.report_id}, final_banner_list: {final_banner_list_for_response}")
     
     return {
         "report_id": req.report_id,
