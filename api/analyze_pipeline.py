@@ -1,4 +1,5 @@
 import numpy as np
+
 from llm.llm_model import BannerTextClassifier
 from llm.llm_utils import analyze_banner_text
 from ocr.ocr_model import OCRModel

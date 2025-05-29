@@ -1,27 +1,15 @@
-from transformers import AutoModelForCausalLM, AutoProcessor, AutoTokenizer
 import torch
-from peft import PeftModel
+import openai
 import re
+import json
 
 class BannerTextClassifier:
-    def __init__(self, llm_base_path, llm_adapter_path):
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        
-        self.base_model = AutoModelForCausalLM.from_pretrained(
-            llm_base_path,
-            trust_remote_code=True,
-            torch_dtype=torch.bfloat16, # 원본 모델에 맞는 데이터 타입을 지정하는 것이 좋습니다.
-            device_map="auto" if device == "cuda" else None # 여러 GPU에 모델을 분산 로드
-            ).to(device)
-        
-        self.tokenizer = AutoTokenizer.from_pretrained(llm_base_path, trust_remote_code=True)
-        self.model = PeftModel.from_pretrained(
-            self.base_model,
-            llm_adapter_path,
-            torch_dtype=torch.bfloat16,
-        ).to(device)
-        
-        self.device = device
+    def __init__(self, api_key: str, model_name: str):
+        if not api_key:
+            raise ValueError("OpenAI API key is required.")
+        self.client = openai.OpenAI(api_key = api_key)
+        self.model_name = model_name
+        print(print(f"BannerTextClassifier initialized with OpenAI model: {self.model_name}"))
         
     def classify_banner_text(self, full_text):
         prompt = """
@@ -46,21 +34,25 @@ class BannerTextClassifier:
                     - Group texts as humans would read
                     - Output only one category, no explanation or copied text
 
-                    Answer: or <|assistant|>
+                    Answer:
                 """
+        user_prompt = prompt.format(banner_info=full_text)
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "user",
+                     "content": user_prompt}
+                ],
+                temperature=0,
+                max_tokens=20
+            )
+            result = response.choices[0].message.content.strip()
+            return result
         
-        full_prompt = prompt.format(full_text=full_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
-        
-        outputs = self.model.generate(
-            **inputs,
-            max_new_tokens=100, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
-            eos_token_id=self.tokenizer.eos_token_id
-        )
-        
-        response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-        
-        return response_text
+        except Exception as e:
+            print(f"Error during classification API call: {e}")
+            return "Error"
 
     def extract_info(self, full_text):
         no_info = "Not detected"
@@ -70,7 +62,7 @@ class BannerTextClassifier:
                     You are an expert data extractor specializing in analyzing unstructured text from OCR (Optical Character Recognition) scans. Your task is to accurately extract the company/store name and phone number from the provided text. The text may contain OCR errors, so be prepared to correct common mistakes.
 
                     **Source Text:**
-                    `{full_text}`
+                    `{banner_text}`
 
                     **Instructions:**
 
@@ -88,25 +80,32 @@ class BannerTextClassifier:
                         * You MUST strictly follow the format below.
                         * If a piece of information cannot be found, use the value `{no_info}`.
 
-                    **Output:**
-                    ```
-                    "Company": "Company Name",
-                    "Phone Number": "Phone Number"
+                   Example of the exact output format:
+                   {{"Company": "추출된 회사명", "Phone Number": "추출된 전화번호"}}
                     
                 """
                 
-        full_prompt = prompt.format(full_text=full_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
+        user_prompt = prompt.format(banner_text=full_text)
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "user",
+                     "content": user_prompt}
+                ],
+                temperature=0,
+                max_tokens=150
+            )
+            extracted_data = json.loads(response.choices[0].message.content)
+            return extracted_data
         
-        outputs = self.base_model.generate(
-            **inputs,
-            max_new_tokens=50, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
-            eos_token_id=self.tokenizer.eos_token_id
-        )
-        
-        response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-        
-        return response_text
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from API response: {e}")
+            print(f"Raw response content: {response.choices[0].message.content if 'response' in locals() and response.choices else 'N/A'}")
+            return {"Company": no_info, "Phone Number": no_info, "Error_Details": "JSON Decode Error"}
+        except Exception as e:
+            print(f"Error during extraction API call: {e}")
+            return {"Company": no_info, "Phone Number": no_info, "Error_Details": str(e)}
     
     def normalize(self, text):
         low_text = text.lower()
@@ -122,7 +121,7 @@ class BannerTextClassifier:
     def process_banner_text(self, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
         classification_result = self.classify_banner_text(full_text)
-        info = None
+        info_data = None
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
         category = self.normalize(classification_result)
@@ -130,10 +129,12 @@ class BannerTextClassifier:
         if category == "Commercial purposes":
             result = "ILLEGAL"
             
-            info = self.extract_info(" ".join(full_text))
+            info_data = self.extract_info(" ".join(full_text))
+        elif category == "Error": # 분류 단계에서 오류가 발생한 경우
+            result = "CLASSIFICATION_ERROR"
         else:
             result = "LEGAL"
         
-        return result, category, info
+        return result, category, info_data
                 
                 
