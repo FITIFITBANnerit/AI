@@ -25,7 +25,7 @@ def extract_company_info(info):
 
     return company_name, phone_number
 
-def analyze_banner_text(ocr_texts, llm, cropped, banner_data):
+def analyze_banner_text(ocr_texts, llm, cropped, banner_data, cropped_info):
     """LLM을 이용하여 현수막의 불법 여부, 카테고리, 전화번호 및 회사명을 추출"""
     for i, key in enumerate(ocr_texts):
         if ocr_texts[key] == "NO_TEXT":
@@ -41,9 +41,9 @@ def analyze_banner_text(ocr_texts, llm, cropped, banner_data):
                             "category": category,
                             "company_name": company_name,
                             "phone_number": str(phone_number),
-                            "center": [float(cropped[i][0]), float(cropped[i][1])],
-                            'width': float(cropped[i][2]),
-                            'height': float(cropped[i][3]), # 해당 배너의 좌표 추가
+                            "center": [float(cropped_info[i][0]), float(cropped_info[i][1])],
+                            'width': float(cropped_info[i][2]),
+                            'height': float(cropped_info[i][3]), # 해당 배너의 좌표 추가
                         },
                     )
 

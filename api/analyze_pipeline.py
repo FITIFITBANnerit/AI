@@ -20,10 +20,15 @@ def analyze_banner_from_url(image_url: str, app):
     
     banner_data = []
     
-    cropped = yolo_model.detect_banners(image, banner_data)
+    cropped, cropped_info = yolo_model.detect_banners(image, banner_data)
+    
     if not cropped:
         print("No banners detected.")
         return banner_data
+    
+    if len(cropped) != len(cropped_info):
+        print("Not same Length!!!!!")
+    
 
     # OCR 실행
     results, banner_data = ocr.run_ocr(image, cropped, banner_data)
@@ -33,6 +38,6 @@ def analyze_banner_from_url(image_url: str, app):
         return banner_data
 
     # 현수막 분석
-    analyze_banner_text(results, llm, cropped, banner_data)
+    analyze_banner_text(results, llm, cropped, banner_data, cropped_info)
     
     return banner_data

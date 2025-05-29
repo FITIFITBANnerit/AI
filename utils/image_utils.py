@@ -41,7 +41,7 @@ def crop_image(image, mask_polygon):
 
 def cropped_banner(original_image, banners, holders, bus, banner_data):
     cropped_banners = []
-
+    cropped_banners_coods = []
     for banner in banners:
         is_legal = False
         for holder in holders:
@@ -67,4 +67,5 @@ def cropped_banner(original_image, banners, holders, bus, banner_data):
                     
         if not is_legal:
             cropped_banners.append(banner['mask'])
-    return cropped_banners
+            cropped_banners_coods.append([float(banner['x']), float(banner['y']), float(banner['width']), float(banner['height'])])
+    return cropped_banners, cropped_banners_coods
