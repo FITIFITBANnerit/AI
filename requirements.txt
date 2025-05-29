@@ -103,3 +103,6 @@ wcwidth==0.2.13
 einops
 timm
 av
+decord
+bitsandbytes
+datasets
