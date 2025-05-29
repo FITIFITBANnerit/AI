@@ -106,3 +106,4 @@ av
 decord
 bitsandbytes
 datasets
+paddleocr==2.10.0

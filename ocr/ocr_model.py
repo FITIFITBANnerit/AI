@@ -7,7 +7,7 @@ import numpy as np
 class OCRModel:
     def __init__(self, lang: str = "korean", **kwargs):
         self.lang = lang
-        self._ocr = PaddleOCR(lang="korean", show_log=False)
+        self._ocr = PaddleOCR(lang="korean", show_log=False, use_gpu=False)
 
     def line_length(self, p1, p2):
         return np.linalg.norm(np.array(p1) - np.array(p2))
