@@ -22,6 +22,8 @@ class YOLOModel:
         padded_image, scale, pad_x, pad_y = resize_with_padding(image)
 
         predictions = self.predict(padded_image)
+        if predictions[0].masks is None or not predictions[0].masks.xy:
+            return [], []
         class_id = predictions[0].boxes.cls.cpu().numpy()
         boxes = predictions[0].boxes.xywh.cpu().numpy()
         masks = predictions[0].masks.xy     # mask 추가
