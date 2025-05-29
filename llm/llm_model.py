@@ -131,6 +131,7 @@ class BannerTextClassifier:
         info = None
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
+        print(classification_result)
         category = self.normalize(classification_result)
         
         if category == "Commercial purposes":
