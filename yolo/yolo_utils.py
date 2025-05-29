@@ -22,15 +22,19 @@ def convert_yolo_to_orginal(box, orginal_size, resized_size, scale, pad_x, pad_y
     return x, y, w, h
 
 # Segmentation 복원 좌표 계산
-def restore_coords(polygon, pad_x, pad_y, scale):
+def restore_coords(polygon, pad_x, pad_y, scale, original_width, original_height):
     restored_polygon = []
     for x, y in polygon:
         restored_x = (x - pad_x) / scale
         restored_y = (y - pad_y) / scale
+        
+        restored_x = min(max(restored_x, 0), original_width - 1)
+        restored_y = min(max(restored_y, 0), original_height - 1)
+        
         restored_polygon.append([restored_x, restored_y])
     return np.array(restored_polygon, dtype=np.int32)
     
-def save_cord(class_id, boxes, masks, dw, dh, scaled, pad_x, pad_y):    # mask 추가
+def save_cord(class_id, boxes, masks, dw, dh, scaled, pad_x, pad_y, original_height, original_width):    # mask 추가
         banners = []
         banner_holder = []
         bus = []
@@ -48,7 +52,7 @@ def save_cord(class_id, boxes, masks, dw, dh, scaled, pad_x, pad_y):    # mask �
                 banner_holder.append(prediction)
             elif class_id[i] == 1:
                 prediction['class'] = 'banner'
-                prediction['mask'] = restore_coords(masks[i], pad_x, pad_y, scaled)
+                prediction['mask'] = restore_coords(masks[i], pad_x, pad_y, scaled, original_height, original_width)
                 banners.append(prediction)
             elif class_id[i] == 2:
                 prediction['class'] = 'bus'
