@@ -47,8 +47,8 @@ class OCRPreprocessing:
 
     def image_preprocessing(self):
         """ 전체 전처리 과정 실행 """
-
-        img = self.gray_scale(self.image)        # Grayscale 변환
+        img = self.image
+        #img = self.gray_scale(img)        # Grayscale 변환
         #img = self.histogram_clahe(img)         # CLAHE 적용 (대비 증가)
         #img = self.sharpening(img)              # 샤프닝 적용 (필요할 경우)
         #img = self.remove_shadow(img)           # 그림자 제거
