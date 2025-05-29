@@ -2,6 +2,7 @@ from transformers import AutoModelForCausalLM, AutoProcessor, AutoTokenizer
 import torch
 from peft import PeftModel
 import re
+import json
 
 class BannerTextClassifier:
     def __init__(self, llm_base_path, llm_adapter_path):
@@ -49,28 +50,28 @@ class BannerTextClassifier:
                     Answer: or <|assistant|>
                 """
         
-        full_prompt = prompt.format(full_text=full_text)
+        full_prompt = prompt.format(banner_info=full_text)
         inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
         
         outputs = self.model.generate(
             **inputs,
-            max_new_tokens=100, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            max_new_tokens=20, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
             eos_token_id=self.tokenizer.eos_token_id
         )
         
         response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         
-        return response_text
+        return response_text.strip()
 
     def extract_info(self, full_text):
-        no_info = "Not detected"
+        no_info_placeholder_value = "Not detected"
         
         prompt = """
                     
                     You are an expert data extractor specializing in analyzing unstructured text from OCR (Optical Character Recognition) scans. Your task is to accurately extract the company/store name and phone number from the provided text. The text may contain OCR errors, so be prepared to correct common mistakes.
 
                     **Source Text:**
-                    `{full_text}`
+                    `{banner_info}`
 
                     **Instructions:**
 
@@ -95,18 +96,41 @@ class BannerTextClassifier:
                     
                 """
                 
-        full_prompt = prompt.format(full_text=full_text)
+        full_prompt = prompt.format(banner_info=full_text)
         inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
         
         outputs = self.base_model.generate(
             **inputs,
-            max_new_tokens=50, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            max_new_tokens=100, 
             eos_token_id=self.tokenizer.eos_token_id
         )
         
         response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         
-        return response_text
+        try:
+            # 수정: 모델이 반환한 JSON 문자열을 파이썬 딕셔너리로 파싱
+            # 모델이 항상 완벽한 JSON을 반환하지 않을 수 있으므로, 추가적인 정제나 오류 처리가 필요할 수 있습니다.
+            # 예: 모델이 JSON 앞뒤로 불필요한 텍스트를 추가하는 경우 정규식 등으로 JSON 부분만 추출
+            # 여기서는 모델이 지시를 잘 따라 순수 JSON 문자열만 반환한다고 가정합니다.
+            
+            # 간혹 모델이 markdown 코드 블록 ```json ... ``` 안에 JSON을 넣는 경우가 있으므로 제거 시도
+            if response_text.startswith("```json"):
+                response_text = response_text[len("```json"):].strip()
+            if response_text.startswith("```"):
+                 response_text = response_text[len("```"):].strip()
+            if response_text.endswith("```"):
+                response_text = response_text[:-len("```")].strip()
+
+            return json.loads(response_text)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from LLM response: {e}")
+            print(f"Raw response text: {response_text}")
+            # 오류 발생 시 기본값 반환
+            return {"Company": no_info_placeholder_value, "Phone Number": no_info_placeholder_value, "Error": "JSON Decode Error"}
+        except Exception as e_gen: # 다른 예외 처리
+            print(f"An unexpected error occurred during info extraction: {e_gen}")
+            print(f"Raw response text: {response_text}")
+            return {"Company": no_info_placeholder_value, "Phone Number": no_info_placeholder_value, "Error": str(e_gen)}
     
     def normalize(self, text):
         low_text = text.lower()
@@ -122,18 +146,24 @@ class BannerTextClassifier:
     def process_banner_text(self, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
         classification_result = self.classify_banner_text(full_text)
-        info = None
+        formatted_info_string = None
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
         category = self.normalize(classification_result)
         
         if category == "Commercial purposes":
             result = "ILLEGAL"
+            info_dict = self.extract_info(" ".join(full_text))
             
-            info = self.extract_info(" ".join(full_text))
+            company_name = info_dict.get("Company", "Not detected")
+            phone_number = info_dict.get("Phone Number", "Not detected")
+            if "Error" in info_dict: # 정보 추출 중 오류가 있었다면 오류 메시지도 포함
+                 formatted_info_string = f"Company: {company_name}, Phone: {phone_number}, ExtractionError: {info_dict.get('Error')}"
+            else:
+                 formatted_info_string = f"Company: {company_name}, Phone: {phone_number}"
         else:
             result = "LEGAL"
         
-        return result, category, info
+        return result, category, formatted_info_string
                 
                 
