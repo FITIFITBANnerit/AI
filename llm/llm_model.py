@@ -72,8 +72,9 @@ class BannerTextClassifier:
         print("classify output: ", outputs)
         response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         print("Classify Output:", response_text)
-        
-        return response_text
+        classification_result = response_text.strip().split('\n')[-1].strip()
+        print("Classification Result: ", classification_result)
+        return classification_result
 
     def extract_info(self, full_text):
         no_info_text = "Not detected"
