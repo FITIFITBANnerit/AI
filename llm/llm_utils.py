@@ -19,9 +19,13 @@ def extract_company_info(info):
         # 값이 존재하면 변수에 저장
         if company_match:
             company_name = company_match.group(1).strip()
-
         if phone_match:
             phone_number = re.sub(r'\D', '', phone_match.group(1))  # 숫자만 추출
+            
+        if company_name == 'Not detected':
+            company_name = 'Not Found' 
+        if phone_number == 'Not detected':
+            phone_number = 'Not Found'
 
     return company_name, phone_number
 

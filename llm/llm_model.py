@@ -85,19 +85,20 @@ class BannerTextClassifier:
         
         prompt = f"""
                     <|user|>
-                    You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Your task is to extract key business information from the text.
+                    You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Each text block also includes font size information, which can help identify the most important content. Your task is to extract key business information from the text.
 
-                    **Source Text (line-sorted OCR output):**
-                    {full_text}
+                    **Source Text (line-sorted OCR output with font sizes):{full_text}**
+                    Each line is structured as: (text, font_size)
 
                     **Instructions:**
 
                     1. **Company/Store Name**
                     - Find the most likely name of the company, store, restaurant, or service.
                     - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과", etc.
-                    - If multiple candidates exist, pick the one that:
-                    - appears near the top of the text, OR
-                    - has promotional tone (e.g., contains "오픈", "할인", "이벤트", etc).
+                    - Use the following criteria to choose the best candidate:
+                    - Text that appears near the top of the OCR text.
+                    - Text with the **largest font size** is often the company or brand name.
+                    - Text with a **promotional tone** (e.g., "오픈", "할인", "이벤트" 등)를 포함할 수 있음.
 
                     2. **Phone Number**
                     - Detect any phone number in formats like `010-XXXX-XXXX`, `(02) XXXX-XXXX`, `031-XXX-XXXX`, etc.
@@ -159,10 +160,10 @@ class BannerTextClassifier:
             for item in sorted_items:
                 y = round(item['center'][1] / 10)  # y값 비슷한 건 같은 줄로 처리
                 if current_y is None or y == current_y:
-                    line.append(item['text'])
+                    line.append((item['text'], item['font_size']))
                 else:
                     lines.append(' '.join(line))
-                    line = [item['text']]
+                    line = [(item['text'], item['font_size'])]
                 current_y = y
 
             # 마지막 줄 추가
