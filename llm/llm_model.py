@@ -95,18 +95,23 @@ class BannerTextClassifier:
                     1. **Company/Store Name**
                     - Find the most likely name of the company, store, restaurant, or service.
                     - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과", etc.
-                    - If multiple candidates exist, pick the one that appears near the top of the text or has a promotional tone.
+                    - If multiple candidates exist, pick the one that:
+                    - appears near the top of the text, OR
+                    - has promotional tone (e.g., contains "오픈", "할인", "이벤트", etc).
 
                     2. **Phone Number**
-                    - Detect any phone number in common formats (e.g., `010-XXXX-XXXX`, `(02) XXXX-XXXX`, etc).
-                    - Correct common OCR mistakes: e.g., 'O' → '0', 'l' → '1', etc.
-                    - If there are multiple numbers, choose the main contact number, not fax or secondary lines.
+                    - Detect any phone number in formats like `010-XXXX-XXXX`, `(02) XXXX-XXXX`, `031-XXX-XXXX`, etc.
+                    - Correct common OCR mistakes:
+                    - 'O' → '0', 'l' or 'I' → '1', 'S' → '5', etc.
+                    - Remove irrelevant characters like '~', '*', etc.
+                    - If multiple numbers exist, pick the **main contact number**, not fax or alternate lines.
 
                     3. **Output Format**
                     You MUST return the result strictly in the format below:
 
-                    "Company": "Extracted Company Name or {no_info_text}",
-                    "Phone Number": "Extracted Phone Number or {no_info_text}"
+                    "Company": "Extracted Company Name or 정보 없음",
+                    "Phone Number": "Extracted Phone Number or 정보 없음"
+
                     <|assistant|>
                 """
                 
