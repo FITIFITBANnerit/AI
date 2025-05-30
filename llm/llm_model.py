@@ -24,87 +24,102 @@ class BannerTextClassifier:
         self.device = device
         
     def classify_banner_text(self, full_text):
-        prompt = """
+        prompt = f"""<|user|>
                     Classify a banner into:
                     - Politics
                     - Public interest
                     - Commercial purposes
                     - Other
 
-                    Input(OCR blocks with text, font size, center (x, y), and confidence): {banner_info}
+                    Input(OCR blocks with text, font size, center (x, y), and confidence): {full_text}
 
                     Guidelines:
                     - Politics: mentions of politicians, parties, elections (e.g., 국민의힘, 이재명)
                     - Public interest: events or announcements (e.g. 축제, 헌혈, 환경)
-                    - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측)
+                    - Commercial purposes: ads or services (e.g. 세일, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측,오픈기념, 테이블당, 공짜)
                     - Other: anything unclear or unrelated
-
+  
                     Instructions:
                     - Prioritize blocks with largest font size and highest confidence
                     - Use center (x, y) to determine visual reading order (top-to-bottom, left-to-right)
                     - Nearby centers imply strong contextual continuity
                     - Group texts as humans would read
                     - Output only one category, no explanation or copied text
-
-                    Answer: or <|assistant|>
+                    
+                    Output only one category, no explanation or copied text
+                    Answer: 
+                <|assistant|>
                 """
         
-        full_prompt = prompt.format(banner_info=full_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
+        #full_prompt = prompt.format(banner_info=full_text)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         
         outputs = self.model.generate(
             **inputs,
-            max_new_tokens=20, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            max_new_tokens=10, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            do_sample=False,
+            pad_token_id=self.tokenizer.eos_token_id,
             eos_token_id=self.tokenizer.eos_token_id
         )
         
-        response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+        response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        print(response_text)
+        if "<|assistant|>" in response_text:
+            classification_result = response_text.split("<|assistant|>")[-1].strip()
+        else:
+            classification_result = response_text.strip()
         
-        return response_text.strip()
+        print("Classification Result: ", classification_result)
+        return classification_result
 
     def extract_info(self, full_text):
         no_info_text = "Not detected"
         
-        prompt = """
-                    
-                    You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Your task is to extract key business information from the text.
+        prompt = f"""
+                    <|user|>
+                    You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Each text block also includes font size information, which can help identify the most important content. Your task is to extract key business information from the text.
 
-                    **Source Text (line-sorted OCR output):**
-                    {banner_info}
+                    **Source Text (line-sorted OCR output with font sizes):{full_text}**
+                    Each line is structured as: (text, font_size)
 
                     **Instructions:**
 
                     1. **Company/Store Name**
                     - Find the most likely name of the company, store, restaurant, or service.
-                    - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과", etc.
-                    - If multiple candidates exist, pick the one that appears near the top of the text or has a promotional tone.
+                    - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과, 성난돼지", etc.
+                    - Use the following criteria to choose the best candidate:
+                    - Text that appears near the top of the OCR text.
+                    - Text with the **largest font size** is often the company or brand name.
+                    - Text with a **promotional tone** (e.g., "오픈", "할인", "이벤트" 등)를 포함할 수 있음.
 
                     2. **Phone Number**
-                    - Detect any phone number in common formats (e.g., `010-XXXX-XXXX`, `(02) XXXX-XXXX`, etc).
-                    - Correct common OCR mistakes: e.g., 'O' → '0', 'l' → '1', etc.
-                    - If there are multiple numbers, choose the main contact number, not fax or secondary lines.
+                    - Detect any phone number in formats like `010-XXXX-XXXX`, `(02) XXXX-XXXX`, `031-XXX-XXXX`, etc.
+                    - Correct common OCR mistakes:
+                    - 'O' → '0', 'l' or 'I' → '1', 'S' → '5', etc.
+                    - Remove irrelevant characters like '~', '*', etc.
+                    - If multiple numbers exist, pick the **main contact number**, not fax or alternate lines.
 
                     3. **Output Format**
                     You MUST return the result strictly in the format below:
 
-                    "Company": "Extracted Company Name or {no_info}",
-                    "Phone Number": "Extracted Phone Number or {no_info}"
-                    
-                    
+                    "Company": "Extracted Company Name or {no_info_text}",
+                    "Phone Number": "Extracted Phone Number or {no_info_text}"
+
+                    <|assistant|>
                 """
                 
-        full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
+        #full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         
         outputs = self.base_model.generate(
             **inputs,
-            max_new_tokens=100, 
+            max_new_tokens=80, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            do_sample=False,
+            pad_token_id=self.tokenizer.eos_token_id,
             eos_token_id=self.tokenizer.eos_token_id
         )
-        
-        response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-        
-        return response_text.strip()
+        response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return response_text
     
     def normalize(self, text):
         low_text = text.lower()
@@ -137,15 +152,19 @@ class BannerTextClassifier:
             for item in sorted_items:
                 y = round(item['center'][1] / 10)  # y값 비슷한 건 같은 줄로 처리
                 if current_y is None or y == current_y:
-                    line.append(item['text'])
+                    line.append((item['text'], item['font_size']))
                 else:
-                    lines.append(' '.join(line))
-                    line = [item['text']]
+                    # ✅ text(font_size) 형식으로 변환
+                    line_text = ' '.join([f"{text}({font_size})" for text, font_size in line])
+                    lines.append(line_text)
+                    line = [(item['text'], item['font_size'])]
                 current_y = y
 
-            # 마지막 줄 추가
+            # 마지막 줄 누락 방지
             if line:
-                lines.append(' '.join(line))
+                line_text = ' '.join([f"{text}({font_size})" for text, font_size in line])
+                lines.append(line_text)
+
 
             # 최종 텍스트
             text = '\n'.join(lines)

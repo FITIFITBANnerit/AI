@@ -19,24 +19,27 @@ def extract_company_info(info):
         # 값이 존재하면 변수에 저장
         if company_match:
             company_name = company_match.group(1).strip()
-
         if phone_match:
             phone_number = re.sub(r'\D', '', phone_match.group(1))  # 숫자만 추출
+            
+        if company_name == 'Not detected':
+            company_name = 'Not Found' 
+        if phone_number == 'Not detected':
+            phone_number = 'Not Found'
 
     return company_name, phone_number
 
 def analyze_banner_text(ocr_texts, llm, cropped, banner_data, cropped_info):
     """LLM을 이용하여 현수막의 불법 여부, 카테고리, 전화번호 및 회사명을 추출"""
     for i, key in enumerate(ocr_texts):
-        print("ocr_text(Non-processing): ", ocr_texts)
         if ocr_texts[key] == "NO_TEXT":
             continue
         elif len(ocr_texts[key]) > 1:
             classification, category, info = llm.process_banner_text(
                 ocr_texts[key]
             )
-            print("BANNER_INFOR_RESULT: ", info)
             company_name, phone_number = extract_company_info(info)
+            print(f"Company Name: {company_name}, Phone Number: {phone_number}")
             banner_data.append(
                         {
                             "status": classification,
