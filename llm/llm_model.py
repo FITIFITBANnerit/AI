@@ -94,7 +94,7 @@ class BannerTextClassifier:
 
                     1. **Company/Store Name**
                     - Find the most likely name of the company, store, restaurant, or service.
-                    - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과", etc.
+                    - It may contain business-related keywords such as "마트", "가구", "의원", "센터", "건설", "치과, 성난돼지", etc.
                     - Use the following criteria to choose the best candidate:
                     - Text that appears near the top of the OCR text.
                     - Text with the **largest font size** is often the company or brand name.
