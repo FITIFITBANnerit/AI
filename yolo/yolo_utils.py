@@ -1,10 +1,16 @@
 import numpy as np
 
 def is_inside(banner, holder):
+    expand_ratio = 0.4
+    expanded_width = holder['width'] * (1 + expand_ratio)
+    expanded_height = holder['height'] * (1 + expand_ratio)
+
     bx_min, bx_max = banner['x'] - banner['width'] / 2, banner['x'] + banner['width'] / 2
     by_min, by_max = banner['y'] - banner['height'] / 2, banner['y'] + banner['height'] / 2
-    hx_min, hx_max = holder['x'] - holder['width'] / 2, holder['x'] + holder['width'] / 2  
-    hy_min, hy_max = holder['y'] - holder['height'] / 2, holder['y'] + holder['height'] / 2  
+    hx_min = holder['x'] - expanded_width / 2
+    hx_max = holder['x'] + expanded_width / 2
+    hy_min = holder['y'] - expanded_height / 2
+    hy_max = holder['y'] + expanded_height / 2 
     
     return bx_min >= hx_min and bx_max <= hx_max and by_min >= hy_min and by_max <= hy_max
 
