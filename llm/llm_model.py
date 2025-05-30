@@ -162,13 +162,17 @@ class BannerTextClassifier:
                 if current_y is None or y == current_y:
                     line.append((item['text'], item['font_size']))
                 else:
-                    lines.append(' '.join(line))
+                    # ✅ text(font_size) 형식으로 변환
+                    line_text = ' '.join([f"{text}({font_size})" for text, font_size in line])
+                    lines.append(line_text)
                     line = [(item['text'], item['font_size'])]
                 current_y = y
 
-            # 마지막 줄 추가
+            # 마지막 줄 누락 방지
             if line:
-                lines.append(' '.join(line))
+                line_text = ' '.join([f"{text}({font_size})" for text, font_size in line])
+                lines.append(line_text)
+
 
             # 최종 텍스트
             text = '\n'.join(lines)
