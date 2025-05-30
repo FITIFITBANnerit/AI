@@ -84,7 +84,7 @@ class BannerTextClassifier:
         no_info_text = "Not detected"
         
         prompt = f"""
-                    
+                    <|user|>
                     You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Your task is to extract key business information from the text.
 
                     **Source Text (line-sorted OCR output):**
@@ -107,8 +107,7 @@ class BannerTextClassifier:
 
                     "Company": "Extracted Company Name or {no_info_text}",
                     "Phone Number": "Extracted Phone Number or {no_info_text}"
-                    
-                    
+                    <|assistant|>
                 """
                 
         #full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
