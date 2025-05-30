@@ -36,16 +36,8 @@ class BannerTextClassifier:
                     Guidelines:
                     - Politics: mentions of politicians, parties, elections (e.g., 국민의힘, 이재명)
                     - Public interest: events or announcements (e.g. 축제, 헌혈, 환경)
-                    - Commercial purposes: ads or services (e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측,오픈기념, 테이블당, 공짜)
+                    - Commercial purposes: ads or services (e.g. 세일, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측,오픈기념, 테이블당, 공짜)
                     - Other: anything unclear or unrelated
-
-                    **Important**:
-                    - If any word in the input is similar to the commercial keywords(e.g. 세일, 병원, 학원, 일반 분양, 씽크대, 가구마트, 인테리어, 도장, 수강생,모집, 실측) above (even if the spelling is slightly incorrect, e.g., "찡크대", "쒸크대", "가굳마트"), you must **unconditionally classify** the banner as **Commercial purposes**.
-                    - Consider common OCR errors such as:
-                    * 'ㅅ' ↔ 'ㅊ' (e.g., 씽 ↔ 찡)
-                    * 'ㄱ' ↔ 'ㅋ', 'ㄷ' ↔ 'ㅌ'
-                    * spacing and hyphen issues
-                    * Latin letter confusion (e.g., 'O' ↔ '0', 'l' ↔ '1')
   
                     Instructions:
                     - Prioritize blocks with largest font size and highest confidence
@@ -71,7 +63,7 @@ class BannerTextClassifier:
         )
         
         response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
+        print(response_text)
         if "<|assistant|>" in response_text:
             classification_result = response_text.split("<|assistant|>")[-1].strip()
         else:
