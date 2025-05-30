@@ -63,10 +63,11 @@ class BannerTextClassifier:
         outputs = self.model.generate(
             **inputs,
             max_new_tokens=100, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
-            eos_token_id=self.tokenizer.eos_token_id
+            #eos_token_id=self.tokenizer.eos_token_id
         )
-        
-        response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+        print("classify output: ", outputs)
+        response_text = self.tokenizer.decode(outputs[0])
+        print("Classify Output:", response_text)
         
         return response_text
 
@@ -107,12 +108,12 @@ class BannerTextClassifier:
         outputs = self.base_model.generate(
             **inputs,
             max_new_tokens=100, 
-            eos_token_id=self.tokenizer.eos_token_id
+            #eos_token_id=self.tokenizer.eos_token_id
         )
-        
-        response_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-        
-        return response_text.strip()
+        print("extract Output: ", outputs)
+        response_text = self.tokenizer.decode(outputs[0])
+        print("extract info: ", response_text)
+        return response_text
     
     def normalize(self, text):
         low_text = text.lower()
@@ -127,6 +128,7 @@ class BannerTextClassifier:
     
     def process_banner_text(self, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
+        print("ocr_text(Non-processing): ", full_text)
         classification_result = self.classify_banner_text(full_text)
         info = None
 

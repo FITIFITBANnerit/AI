@@ -28,7 +28,6 @@ def extract_company_info(info):
 def analyze_banner_text(ocr_texts, llm, cropped, banner_data, cropped_info):
     """LLM을 이용하여 현수막의 불법 여부, 카테고리, 전화번호 및 회사명을 추출"""
     for i, key in enumerate(ocr_texts):
-        print("ocr_text(Non-processing): ", ocr_texts[key])
         if ocr_texts[key] == "NO_TEXT":
             continue
         elif len(ocr_texts[key]) > 1:
