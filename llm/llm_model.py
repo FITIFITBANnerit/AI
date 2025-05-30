@@ -109,8 +109,8 @@ class BannerTextClassifier:
                     3. **Output Format**
                     You MUST return the result strictly in the format below:
 
-                    "Company": "Extracted Company Name or 정보 없음",
-                    "Phone Number": "Extracted Phone Number or 정보 없음"
+                    "Company": "Extracted Company Name or {no_info_text}",
+                    "Phone Number": "Extracted Phone Number or {no_info_text}"
 
                     <|assistant|>
                 """
@@ -126,7 +126,6 @@ class BannerTextClassifier:
             eos_token_id=self.tokenizer.eos_token_id
         )
         response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print("extract info: ", response_text)
         return response_text
     
     def normalize(self, text):
@@ -142,7 +141,6 @@ class BannerTextClassifier:
     
     def process_banner_text(self, full_text):
         """현수막 텍스트를 분석하고 불법이라면 추가 정보를 추출."""
-        print("ocr_text(Non-processing): ", full_text)
         classification_result = self.classify_banner_text(full_text)
         info = None
 
