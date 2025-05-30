@@ -69,22 +69,26 @@ class BannerTextClassifier:
             pad_token_id=self.tokenizer.eos_token_id,
             eos_token_id=self.tokenizer.eos_token_id
         )
-        print("classify output: ", outputs)
+        
         response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print("Classify Output:", response_text)
-        classification_result = response_text.strip().split('\n')[-1].strip()
+        
+        if "<|assistant|>" in response_text:
+            classification_result = response_text.split("<|assistant|>")[-1].strip()
+        else:
+            classification_result = response_text.strip()
+        
         print("Classification Result: ", classification_result)
         return classification_result
 
     def extract_info(self, full_text):
         no_info_text = "Not detected"
         
-        prompt = """
+        prompt = f"""
                     
                     You are an expert data extractor specializing in analyzing banner advertisements from OCR scans. The text you receive has already been sorted by visual position: top to bottom, and left to right within each line. Your task is to extract key business information from the text.
 
                     **Source Text (line-sorted OCR output):**
-                    {banner_info}
+                    {full_text}
 
                     **Instructions:**
 
@@ -101,22 +105,23 @@ class BannerTextClassifier:
                     3. **Output Format**
                     You MUST return the result strictly in the format below:
 
-                    "Company": "Extracted Company Name or {no_info}",
-                    "Phone Number": "Extracted Phone Number or {no_info}"
+                    "Company": "Extracted Company Name or {no_info_text}",
+                    "Phone Number": "Extracted Phone Number or {no_info_text}"
                     
                     
                 """
                 
-        full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
+        #full_prompt = prompt.format(banner_info=full_text, no_info=no_info_text)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         
         outputs = self.base_model.generate(
             **inputs,
-            max_new_tokens=100, 
-            #eos_token_id=self.tokenizer.eos_token_id
+            max_new_tokens=80, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            do_sample=False,
+            pad_token_id=self.tokenizer.eos_token_id,
+            eos_token_id=self.tokenizer.eos_token_id
         )
-        print("extract Output: ", outputs)
-        response_text = self.tokenizer.decode(outputs[0])
+        response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         print("extract info: ", response_text)
         return response_text
     
@@ -138,7 +143,6 @@ class BannerTextClassifier:
         info = None
 
         # 찾으면 저장, 없으면 "Unknown"으로 설정
-        print("Classification Result: ", classification_result)
         category = self.normalize(classification_result)
         
         if category == "Commercial purposes":
