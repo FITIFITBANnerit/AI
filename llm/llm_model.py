@@ -24,14 +24,14 @@ class BannerTextClassifier:
         self.device = device
         
     def classify_banner_text(self, full_text):
-        prompt = """
+        prompt = f"""<|user|>
                     Classify a banner into:
                     - Politics
                     - Public interest
                     - Commercial purposes
                     - Other
 
-                    Input(OCR blocks with text, font size, center (x, y), and confidence): {banner_info}
+                    Input(OCR blocks with text, font size, center (x, y), and confidence): {full_text}
 
                     Guidelines:
                     - Politics: mentions of politicians, parties, elections (e.g., 국민의힘, 이재명)
@@ -53,8 +53,10 @@ class BannerTextClassifier:
                     - Nearby centers imply strong contextual continuity
                     - Group texts as humans would read
                     - Output only one category, no explanation or copied text
-
-                    Answer: or <|assistant|>
+                    
+                    Output only one category, no explanation or copied text
+                    Answer: 
+                <|assistant|>
                 """
         
         full_prompt = prompt.format(banner_info=full_text)
@@ -62,11 +64,13 @@ class BannerTextClassifier:
         
         outputs = self.model.generate(
             **inputs,
-            max_new_tokens=100, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
-            #eos_token_id=self.tokenizer.eos_token_id
+            max_new_tokens=10, # 분류 결과만 받으면 되므로 길게 설정할 필요 없음
+            do_sample=False,
+            pad_token_id=self.tokenizer.eos_token_id,
+            eos_token_id=self.tokenizer.eos_token_id
         )
         print("classify output: ", outputs)
-        response_text = self.tokenizer.decode(outputs[0])
+        response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         print("Classify Output:", response_text)
         
         return response_text
