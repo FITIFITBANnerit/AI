@@ -60,7 +60,7 @@ class BannerTextClassifier:
                 """
         
         full_prompt = prompt.format(banner_info=full_text)
-        inputs = self.tokenizer(full_prompt, return_tensors="pt").to(self.device)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         
         outputs = self.model.generate(
             **inputs,
