@@ -4,6 +4,8 @@ from ocr.ocr_utils import OCRPreprocessing
 from utils.image_utils import crop_image
 import numpy as np
 
+from yolo.yolo_utils import warp_and_mask_auto_size
+
 class OCRModel:
     def __init__(self, lang: str = "korean", **kwargs):
         self.lang = lang
@@ -47,8 +49,13 @@ class OCRModel:
         for i, cord in enumerate(images_cord):
             
             image = crop_image(original_image, cord)  # banner 부분만 추출
+            try:
+                final_image = warp_and_mask_auto_size(original_image, cord)
+            except Exception as e:
+                print(f"warp_and_mask_auto_size 실패: {e}")
+                final_image = image
             
-            ocr_preprocessing = OCRPreprocessing(image)
+            ocr_preprocessing = OCRPreprocessing(final_image)
             preprocessing_image = ocr_preprocessing.image_preprocessing()
             result = self._ocr.ocr(preprocessing_image, cls=False)
             
